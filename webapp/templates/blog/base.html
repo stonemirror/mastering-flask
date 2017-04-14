@@ -3,7 +3,7 @@
     <nav>
         <ul class="pagination">
             <li>
-                <a href="{{ url_for('home', page=pagination.prev().page) }}" aria-label="Previous">
+                <a href="{{ url_for('blog.home', page=pagination.prev().page) }}" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
@@ -23,7 +23,7 @@
                 {% endif %}
             {% endfor %}
             <li>
-                <a href="{{ url_for('home', page=pagination.next().page) }}" aria-label="Next">
+                <a href="{{ url_for('blog.home', page=pagination.next().page) }}" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -37,7 +37,7 @@
         <ul class="pagination">
             {% if pagination.has_prev %}
                 <li>
-                    <a href="{{ url_for('home', page=pagination.prev().page) }}" aria-label="Previous">
+                    <a href="{{ url_for('blog.home', page=pagination.prev().page) }}" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
@@ -55,7 +55,7 @@
             {% endfor %}
             {% if pagination.has_next %}
                 <li>
-                    <a href="{{ url_for('home', page=pagination.next().page) }}" aria-label="Next">
+                    <a href="{{ url_for('blog.home', page=pagination.next().page) }}" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
@@ -76,13 +76,27 @@
 <body>
     <div class="container">
         <div class="jumbotron">
-            <h1><a href="{{ url_for('home') }}">My Blog</a></h1>
+            <h1><a href="{{ url_for('blog.home') }}">My Blog</a></h1>
             <p>Welcome to the blog!</p>
         </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissable" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         {% block body %}
         {% endblock %}
     </div>
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    {% block js %}
+    {% endblock %}
 </body>
 </html>
