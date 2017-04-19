@@ -2,7 +2,11 @@
 {% block title %}Login{% endblock %}
 {% block body %}
 <div class="col-lg-6">
-<h3>Login</h3>
-{{ layout_form(form, 'main.login', 'Login') }}
+    <h3>Login</h3>
+    {{ layout_form(form, 'main.login', 'Login') }}
+    <h2 class="text-center">Register with Facebook</h2>
+    <a href="{{ url_for('.facebook_login') }}">Login via Facebook</a>
+    <h2 class="text-center">Register with Twitter</h2>
+    <a href="{{ url_for('.twitter_login') }}">Login via Twitter</a>
 </div>
 {% endblock %}

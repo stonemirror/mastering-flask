@@ -1,4 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import (
+    Blueprint,
+    render_template,
+    redirect,
+    url_for,
+    session,
+    g
+)
 from sqlalchemy import func
 from os import path
 from webapp.models import db, User, Post, Comment, Tag, tags
@@ -96,6 +103,8 @@ def user(username):
 
 @blog_blueprint.route('/new', methods=['GET', 'POST'])
 def new_post():
+    if not g.current_user:
+        return redirect(url_for('main.login'))
     form = PostForm()
     if form.validate_on_submit():
         new_post = Post(form.title.data)
@@ -119,3 +128,13 @@ def edit_post(id):
         return redirect(url_for('.post', post_id=post.id))
     form.text.data = post.text
     return render_template('edit.html', form=form, post=post)
+
+
+@blog_blueprint.before_request
+def check_user():
+    if 'username' in session:
+        g.current_user = User.query.filter_by(
+            username=session['username']
+        ).one()
+    else:
+        g.current_user = None

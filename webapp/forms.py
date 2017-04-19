@@ -28,7 +28,7 @@ class LoginForm(FlaskForm):
         'Username',
         validators=[DataRequired(), Length(max=255)]
     )
-    Password = PasswordField(
+    password = PasswordField(
         'Password',
         validators=[DataRequired()]
     )
@@ -54,7 +54,7 @@ class LoginForm(FlaskForm):
         #
         # Do the password hashes match?
         #
-        if not self.user.check_password(self.password.data):
+        if not user.check_password(self.password.data):
             self.username.errors.append(
                 'Invalid username or password'
             )
@@ -76,7 +76,7 @@ class RegisterForm(FlaskForm):
     )
     confirm = PasswordField(
         'Confirm Password',
-        validators=[DataRequired(), EqualTo(password)]
+        validators=[DataRequired(), EqualTo('password')]
     )
     recaptcha = RecaptchaField()
 
@@ -104,3 +104,7 @@ class PostForm(FlaskForm):
         'Content',
         validators=[DataRequired()]
     )
+
+
+class OpenIDForm(FlaskForm):
+    openid = StringField('OpenID URL', validators=[DataRequired(), URL()])

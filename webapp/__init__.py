@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for
 from controllers.blog import blog_blueprint
 from controllers.main import main_blueprint
-from webapp.extensions import bcrypt
+from webapp.extensions import bcrypt, oid
 from models import db
 
 
@@ -11,6 +11,7 @@ def create_app(object_name):
 
     db.init_app(app)
     bcrypt.init_app(app)
+    oid.init_app(app)
 
     #
     # Routes
