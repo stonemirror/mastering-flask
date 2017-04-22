@@ -111,11 +111,11 @@ def facebook_authorized(resp):
             request.args['error_reason'],
             request.args['error_description']
         )
-    session['facebook_auth_token'] = (resp['access_token'], '')
+    session['facebook_oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/me')
-    user = User.query.filter_by(username=me.data['first_name'] + " " + me.data['last_name']).first()
+    user = User.query.filter_by(username=me.data['name']).first()
     if not user:
-        user = User(me.data['first_name'] + " " + me.data['last_name'])
+        user = User(me.data['name'])
         db.session.add(user)
         db.session.commit()
     #
