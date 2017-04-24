@@ -6,6 +6,7 @@ from flask import (
     session,
     g
 )
+from flask_login import login_required
 from sqlalchemy import func
 from os import path
 from webapp.models import db, User, Post, Comment, Tag, tags
@@ -102,6 +103,7 @@ def user(username):
 
 
 @blog_blueprint.route('/new', methods=['GET', 'POST'])
+@login_required
 def new_post():
     if not g.current_user:
         return redirect(url_for('main.login'))
@@ -116,6 +118,7 @@ def new_post():
 
 
 @blog_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_post(id):
     post = Post.query.get_or_404(id)
     form = PostForm()

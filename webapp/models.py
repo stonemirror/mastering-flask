@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import AnonymousUserMixin
 from webapp.extensions import bcrypt
 
 db = SQLAlchemy()
@@ -17,10 +18,11 @@ class User(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     username = db.Column(db.String(255))
     password = db.Column(db.String(255))
-    posts = db.relationship('Post',
-                            backref='user',
-                            lazy='dynamic'
-                            )
+    posts = db.relationship(
+        'Post',
+        backref='user',
+        lazy='dynamic'
+    )
 
     def __init__(self, username):
         self.username = username
@@ -33,6 +35,24 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
+
+    def is_authenticated(self):
+        if isinstance(self, AnonymousUserMixin):
+            return False
+        else:
+            return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        if isinstance(self, AnonymousUserMixin):
+            return True
+        else:
+            return False
+
+    def get_id(self):
+        return unicode(self.id)
 
 
 class Post(db.Model):

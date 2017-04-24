@@ -32,6 +32,7 @@ class LoginForm(FlaskForm):
         'Password',
         validators=[DataRequired()]
     )
+    remember = BooleanField("Remember Me")
 
     def validate(self):
         check_validate = super(LoginForm, self).validate()
