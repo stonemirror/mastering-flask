@@ -129,13 +129,14 @@ def facebook_authorized(resp):
 
 @main_blueprint.route('/twitter-login')
 def twitter_login():
-    return twitter.authorize(
+    response = twitter.authorize(
         callback=url_for(
             '.twitter_authorized',
             next=request.referrer or None,
             _external=True
         )
     )
+    return response
 
 
 @main_blueprint.route('/twitter-login/authorized')
@@ -146,12 +147,13 @@ def twitter_authorized(resp):
                 request.args['error_reason'],
                 request.args['error_description']
             )
-    session['twitter_oauth_token'] = resp['oauth_token'] + resp['oauth_token_secret']
+    session['twitter_oauth_token'] = resp['oauth_token'] +\
+        resp['oauth_token_secret']
     user = User.query.filter_by(
         username=resp['screen_name']
     ).first()
     if not user:
-        user = User(resp['screen_name'], '')
+        user = User(resp['screen_name'])
         db.session.add(user)
         db.session.commit()
     #
