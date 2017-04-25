@@ -3,15 +3,16 @@ from flask import (
     render_template,
     redirect,
     url_for,
-    session,
-    g
+    abort
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
+from flask_principal import Permission, UserNeed
 from sqlalchemy import func
 from os import path
+import datetime
 from webapp.models import db, User, Post, Comment, Tag, tags
 from webapp.forms import CommentForm, PostForm
-import datetime
+from webapp.extensions import poster_permission, admin_permission
 
 blog_blueprint = Blueprint(
     'blog',
@@ -104,14 +105,16 @@ def user(username):
 
 @blog_blueprint.route('/new', methods=['GET', 'POST'])
 @login_required
+@poster_permission.require(http_exception=403)
 def new_post():
-    if not g.current_user:
-        return redirect(url_for('main.login'))
     form = PostForm()
     if form.validate_on_submit():
         new_post = Post(form.title.data)
         new_post.text = form.text.data
         new_post.publish_date = datetime.datetime.now()
+        new_post.user = User.query.filter_by(
+            username=current_user.username
+        ).one()
         db.session.add(new_post)
         db.session.commit()
     return render_template('new.html', form=form)
@@ -119,25 +122,19 @@ def new_post():
 
 @blog_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@poster_permission.require(http_exception=403)
 def edit_post(id):
     post = Post.query.get_or_404(id)
-    form = PostForm()
-    if form.validate_on_submit():
-        post.title = form.title.data
-        post.text = form.text.data
-        post.publish_date = datetime.datetime.now()
-        db.session.add(post)
-        db.session.commit()
-        return redirect(url_for('.post', post_id=post.id))
-    form.text.data = post.text
-    return render_template('edit.html', form=form, post=post)
-
-
-@blog_blueprint.before_request
-def check_user():
-    if 'username' in session:
-        g.current_user = User.query.filter_by(
-            username=session['username']
-        ).one()
-    else:
-        g.current_user = None
+    permission = Permission(UserNeed(post.user.id))
+    if permission.can() or admin_permission.can():
+        form = PostForm()
+        if form.validate_on_submit():
+            post.title = form.title.data
+            post.text = form.text.data
+            post.publish_date = datetime.datetime.now()
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('.post', post_id=post.id))
+        form.text.data = post.text
+        return render_template('edit.html', form=form, post=post)
+    abort(403)

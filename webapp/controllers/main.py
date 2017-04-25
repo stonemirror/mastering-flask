@@ -5,9 +5,15 @@ from flask import (
     url_for,
     flash,
     request,
-    session
+    session,
+    current_app
 )
 from flask_login import login_user, logout_user
+from flask_principal import (
+    Identity,
+    AnonymousIdentity,
+    identity_changed
+)
 from webapp.forms import LoginForm, RegisterForm, OpenIDForm
 from webapp.models import db, User
 from webapp.extensions import oid, facebook, twitter
@@ -42,7 +48,10 @@ def login():
             username=form.username.data
         ).one()
         login_user(user, remember=form.remember.data)
-        session['username'] = form.username.data
+        identity_changed.send(
+            current_app._get_current_object(),
+            identity=Identity(user.id)
+        )
         flash("You have been logged in.", category="success")
         return redirect(url_for('blog.home'))
 
@@ -60,8 +69,11 @@ def login():
 @main_blueprint.route('/logout', methods=['GET', 'POST'])
 def logout():
     logout_user()
+    identity_changed.send(
+        current_app._get_current_object(),
+        identity=AnonymousIdentity()
+    )
     flash("You have been logged out.", category="success")
-    session.pop('username', None)
     return redirect(url_for('blog.home'))
 
 
