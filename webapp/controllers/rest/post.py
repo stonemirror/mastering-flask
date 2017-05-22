@@ -51,9 +51,12 @@ class PostApi(Resource):
 
     def post(self, post_id=None):
         if post_id:
-            abort(400)
+            abort(405)
         else:
             args = post_post_parser.parse_args(strict=True)
+            user = User.verify_auth_token(args['token'])
+            if not user:
+                abort(401)
             new_post = Post(args['title'])
             new_post.publish_date = datetime.datetime.now()
             new_post.text = args['text']
