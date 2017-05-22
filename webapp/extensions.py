@@ -4,12 +4,14 @@ from flask_openid import OpenID
 from flask_oauth import OAuth
 from flask_login import LoginManager
 from flask_principal import Principal, Permission, RoleNeed
+from flask_restful import Api
 
 bcrypt = Bcrypt()
 oid = OpenID()
 oauth = OAuth()
 login_manager = LoginManager()
 principals = Principal()
+rest_api = Api()
 
 login_manager.login_view = "main.login"
 login_manager.session_protection = "strong"
