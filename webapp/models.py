@@ -2,7 +2,7 @@ from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import AnonymousUserMixin
 from webapp.extensions import bcrypt
-from itsdangerous import(
+from itsdangerous import (
     TimedJSONWebSignatureSerializer as Serializer,
     BadSignature,
     SignatureExpired

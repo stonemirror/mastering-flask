@@ -58,6 +58,7 @@ class PostApi(Resource):
             if not user:
                 abort(401)
             new_post = Post(args['title'])
+            new_post.user = user
             new_post.publish_date = datetime.datetime.now()
             new_post.text = args['text']
             if args['tags']:
