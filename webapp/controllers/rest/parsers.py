@@ -49,3 +49,24 @@ user_post_parser.add_argument(
     type=str,
     required=True
 )
+
+post_put_parser = reqparse.RequestParser()
+post_put_parser.add_argument(
+    'token',
+    type=str,
+    required=True,
+    help="Auth token is required to edit posts"
+)
+post_put_parser.add_argument(
+    'title',
+    type=str
+)
+post_put_parser.add_argument(
+    'text',
+    type=str
+)
+post_put_parser.add_argument(
+    'tags',
+    type=str,
+    action='append'
+)
