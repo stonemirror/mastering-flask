@@ -6,7 +6,8 @@ from .fields import HTMLField
 from .parsers import (
     post_get_parser,
     post_post_parser,
-    post_put_parser
+    post_put_parser,
+    post_delete_parser
 )
 
 
@@ -99,3 +100,17 @@ class PostApi(Resource):
         db.session.add(post)
         db.session.commit()
         return post.id, 201
+
+    def delete(self, post_id=None):
+        if not post_id:
+            abort(400)
+        post = Post.query.get(post_id)
+        if not post:
+            abort(404)
+        args = post_delete_parser.parse_args(strict=True)
+        user = User.verify_auth_token(args['token'])
+        if user != post.user:
+            abort(403)
+        db.session.delete(post)
+        db.session.commit()
+        return "", 204
