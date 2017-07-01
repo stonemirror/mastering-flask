@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for
 from flask_login import current_user
 from flask_principal import identity_loaded, UserNeed, RoleNeed
+from sqlalchemy import event
 from controllers.blog import blog_blueprint
 from controllers.main import main_blueprint
 from webapp.extensions import (
@@ -8,11 +9,13 @@ from webapp.extensions import (
     oid,
     login_manager,
     principals,
-    rest_api
+    rest_api,
+    celery
 )
+from webapp.tasks import on_reminder_save
+from webapp.models import db, Reminder
 from .controllers.rest.post import PostApi
 from .controllers.rest.auth import AuthApi
-from models import db
 
 
 def create_app(object_name):
@@ -20,6 +23,7 @@ def create_app(object_name):
     app.config.from_object(object_name)
 
     db.init_app(app)
+    event.listen(Reminder, 'after_insert', on_reminder_save)
     bcrypt.init_app(app)
     oid.init_app(app)
     login_manager.init_app(app)
@@ -36,6 +40,7 @@ def create_app(object_name):
         endpoint='auth'
     )
     rest_api.init_app(app)
+    celery.init_app(app)
 
     @identity_loaded.connect_via(app)
     def on_identity_loaded(sender, identity):
