@@ -6,6 +6,11 @@ from flask_login import LoginManager
 from flask_principal import Principal, Permission, RoleNeed
 from flask_restful import Api
 from flask_celery import Celery
+from flask_debugtoolbar import DebugToolbarExtension
+from flask_cache import Cache
+from flask_assets import Environment, Bundle
+from flask_admin import Admin
+from flask_mail import Mail
 
 bcrypt = Bcrypt()
 oid = OpenID()
@@ -14,6 +19,11 @@ login_manager = LoginManager()
 principals = Principal()
 rest_api = Api()
 celery = Celery()
+debug_toolbar = DebugToolbarExtension()
+cache = Cache()
+assets_env = Environment()
+admin = Admin()
+mail = Mail()
 
 login_manager.login_view = "main.login"
 login_manager.session_protection = "strong"
@@ -79,3 +89,20 @@ def get_facebook_oauth_token():
 @twitter.tokengetter
 def get_twitter_oauth_token():
     return session.get('twitter_oauth_token')
+
+
+#
+# Assets
+#
+main_css = Bundle(
+    'css/bootstrap.css',
+    filters='cssmin',
+    output='css/common.css'
+)
+
+main_js = Bundle(
+    'js/jquery.js',
+    'js/bootstrap.js',
+    filters='jsmin',
+    output='js/common.js'
+)

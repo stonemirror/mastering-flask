@@ -1,3 +1,4 @@
+import os
 from flask import Flask, redirect, url_for
 from flask_login import current_user
 from flask_principal import identity_loaded, UserNeed, RoleNeed
@@ -10,12 +11,25 @@ from webapp.extensions import (
     login_manager,
     principals,
     rest_api,
-    celery
+    celery,
+    debug_toolbar,
+    cache,
+    assets_env,
+    main_js,
+    main_css,
+    admin,
+    mail
 )
 from webapp.tasks import on_reminder_save
-from webapp.models import db, Reminder
+from webapp.models import db, Reminder, User, Post, Role, Comment, Tag
 from .controllers.rest.post import PostApi
 from .controllers.rest.auth import AuthApi
+from webapp.controllers.admin import (
+    CustomView,
+    CustomModelView,
+    PostView,
+    CustomFileAdmin
+)
 
 
 def create_app(object_name):
@@ -41,6 +55,64 @@ def create_app(object_name):
     )
     rest_api.init_app(app)
     celery.init_app(app)
+    debug_toolbar.init_app(app)
+    cache.init_app(app)
+    assets_env.init_app(app)
+    assets_env.register("main_js", main_js)
+    assets_env.register("main_css", main_css)
+    admin.init_app(app)
+    # admin.add_view(CustomView(name="Custom"))
+    # models = [User, Role, Post, Comment, Tag, Reminder]
+    # for model in models:
+    #     if model is not Post:
+    #         admin.add_view(
+    #             CustomModelView(model, db.session, category="models")
+    #         )
+    #     else:
+    #         admin.add_view(
+    #             PostView(Post, db.session, category="models")
+    #         )
+    admin.add_view(CustomView(name='Custom'))
+    admin.add_view(
+        CustomModelView(
+            User, db.session, category="Models"
+        )
+    )
+    admin.add_view(
+        CustomModelView(
+            Role, db.session, category="Models"
+        )
+    )
+    #
+    # Need to use a special view for Posts to get the CKEditor functionality
+    #
+    admin.add_view(
+        PostView(Post, db.session, category="Models")
+    )
+    admin.add_view(
+        CustomModelView(
+            Comment, db.session, category="Models"
+        )
+    )
+    admin.add_view(
+        CustomModelView(
+            Tag, db.session, category="Models"
+        )
+    )
+    admin.add_view(
+        CustomModelView(
+            Reminder, db.session, category="Models"
+        )
+    )
+    admin.add_view(
+        CustomFileAdmin(
+            os.path.join(os.path.dirname(__file__), 'static'),
+            '/static/',
+            name='Static Files'
+        )
+    )
+    mail.init_app(app)
+
 
     @identity_loaded.connect_via(app)
     def on_identity_loaded(sender, identity):

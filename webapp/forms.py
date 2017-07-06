@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import (
+    widgets,
     StringField,
     TextAreaField,
     PasswordField,
@@ -12,6 +13,16 @@ from webapp.models import User
 #
 # Forms
 #
+class CKTextAreaWidget(widgets.TextArea):
+    def __call__(self, field, **kwargs):
+        kwargs.setdefault('class_', 'ckeditor')
+        return super(CKTextAreaWidget, self).__call__(field, **kwargs)
+
+
+class CKTextAreaField(TextAreaField):
+    widget = CKTextAreaWidget()
+
+
 class CommentForm(FlaskForm):
     name = StringField(
         'Name',

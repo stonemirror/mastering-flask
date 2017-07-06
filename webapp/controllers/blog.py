@@ -3,7 +3,8 @@ from flask import (
     render_template,
     redirect,
     url_for,
-    abort
+    abort,
+    request
 )
 from flask_login import login_required, current_user
 from flask_principal import Permission, UserNeed
@@ -12,7 +13,7 @@ from os import path
 import datetime
 from webapp.models import db, User, Post, Comment, Tag, tags
 from webapp.forms import CommentForm, PostForm
-from webapp.extensions import poster_permission, admin_permission
+from webapp.extensions import poster_permission, admin_permission, cache
 
 blog_blueprint = Blueprint(
     'blog',
@@ -22,6 +23,7 @@ blog_blueprint = Blueprint(
 )
 
 
+@cache.cached(timeout=7200, key_prefix='sidebar_data')
 def sidebar_data():
     recent = Post.query.order_by(
         Post.publish_date.desc()
@@ -33,9 +35,16 @@ def sidebar_data():
     ).group_by(Tag).order_by('total DESC').limit(5).all()
     return recent, top_tags
 
+# def make_cache_key(*args, **kwargs):
+#     path = request.path
+#     args = str(hash(frozenset(request.args.items())))
+#     lang = get_locale()
+#     return (path + args + lang).encode('utf-8')
+
 
 @blog_blueprint.route('/')
 @blog_blueprint.route('/<int:page>')
+@cache.cached(timeout=60)
 def home(page=1):
     posts = Post.query.order_by(
         Post.publish_date.desc()
@@ -50,6 +59,7 @@ def home(page=1):
 
 
 @blog_blueprint.route('/post/<int:post_id>', methods=('GET', 'POST'))
+# @cache.cached(timeout=600, key_prefix=make_cache_key)
 def post(post_id):
     form = CommentForm()
     if form.validate_on_submit():

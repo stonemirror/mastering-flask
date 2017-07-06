@@ -71,7 +71,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE-Edge">
     <meta name="viewport" content="width=device-width initial-scale=1">
     <title>{% block title %}Blog{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    {% assets "main_css" %}
+        <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
+    {% endassets %}
 </head>
 <body>
     <div class="container">
@@ -94,8 +96,9 @@
         {% block body %}
         {% endblock %}
     </div>
-    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    {% assets "main_js" %}
+        <script src="{{ ASSET_URL }}"></script>
+    {% endassets %}
     {% block js %}
     {% endblock %}
 </body>

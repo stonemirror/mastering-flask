@@ -1,7 +1,7 @@
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import AnonymousUserMixin
-from webapp.extensions import bcrypt
+from webapp.extensions import bcrypt, cache
 from itsdangerous import (
     TimedJSONWebSignatureSerializer as Serializer,
     BadSignature,
@@ -75,6 +75,7 @@ class User(db.Model):
         return unicode(self.id)
 
     @staticmethod
+    @cache.memoize(60)
     def verify_auth_token(token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:

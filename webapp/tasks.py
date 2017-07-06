@@ -1,7 +1,7 @@
 from flask import current_app, render_template
-from webapp.extensions import celery
+from flask_mail import Message
+from webapp.extensions import celery, mail
 from webapp.models import Reminder, Post
-import smtplib
 import datetime
 from email.mime.text import MIMEText
 
@@ -24,25 +24,15 @@ def multiply(x, y):
 )
 def remind(self, pk):
     reminder = Reminder.query.get(pk)
-    msg = MIMEText(reminder.text)
-    server = current_app.config['EMAIL_SERVER']
-    user = current_app.config['EMAIL_USER']
-    password = current_app.config['EMAIL_PASSWORD']
+    user = current_app.config['MAIL_USERNAME']
+    msg = Message("Your reminder",
+                  sender=user,
+                  recipients=[reminder.email])
     msg['Subject'] = "Your reminder"
     msg['From'] = user
     msg['To'] = reminder.email
-    try:
-        smtp_server = smtplib.SMTP(server)
-        smtp_server.starttls()
-        smtp_server.login(user, password)
-        smtp_server.sendmail(
-            user,
-            [reminder.email],
-            msg.as_string()
-        )
-        smtp_server.close()
-    except Exception, e:
-        self.retry(exc=e)
+    msg.body = MIMEText(reminder.text)
+    mail.send(msg)
 
 
 @celery.task(
