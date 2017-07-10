@@ -18,7 +18,9 @@ from webapp.extensions import (
     main_js,
     main_css,
     admin,
-    mail
+    mail,
+    youtube_ext,
+    flask_gzip
 )
 from webapp.tasks import on_reminder_save
 from webapp.models import db, Reminder, User, Post, Role, Comment, Tag
@@ -112,7 +114,11 @@ def create_app(object_name):
         )
     )
     mail.init_app(app)
-
+    youtube_ext.init_app(app)
+#
+# This extension and the debug toolbar can't both be running...
+#
+#    flask_gzip.init_app(app)
 
     @identity_loaded.connect_via(app)
     def on_identity_loaded(sender, identity):

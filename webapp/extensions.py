@@ -1,4 +1,9 @@
-from flask import redirect, url_for, flash, session
+from flask import (
+    redirect,
+    url_for,
+    flash,
+    session
+)
 from flask_bcrypt import Bcrypt
 from flask_openid import OpenID
 from flask_oauth import OAuth
@@ -11,6 +16,14 @@ from flask_cache import Cache
 from flask_assets import Environment, Bundle
 from flask_admin import Admin
 from flask_mail import Mail
+from flask_youtube import Youtube
+#
+# For inline GZip-compression extension (in progress)
+#
+from flask import request
+from gzip import GzipFile
+from io import BytesIO
+
 
 bcrypt = Bcrypt()
 oid = OpenID()
@@ -24,6 +37,7 @@ cache = Cache()
 assets_env = Environment()
 admin = Admin()
 mail = Mail()
+youtube_ext = Youtube()
 
 login_manager.login_view = "main.login"
 login_manager.session_protection = "strong"
@@ -106,3 +120,31 @@ main_js = Bundle(
     filters='jsmin',
     output='js/common.js'
 )
+
+
+class GZip(object):
+    def __init__(self, app=None):
+        self.app = app
+        if app is not None:
+            self.init_app(app)
+
+    def init_app(self, app):
+        app.after_request(self.after_request)
+
+    def after_request(self, response):
+        encoding = request.headers.get('Accept-Encoding', '')
+        if 'gzip' not in encoding or response.status_code not in (200, 201):
+            return response
+        response.direct_passthrough = False
+        contents = BytesIO()
+        with GzipFile(mode='wb',
+                      compresslevel=5,
+                      fileobj=contents) as gzip_file:
+            gzip_file.write(response.get_data())
+        response.set_data(bytes(contents.getvalue()))
+        response.headers['Content-Encoding'] = 'gzip'
+        response.headers['Content-Length'] = response.content_length
+        return response
+
+
+flask_gzip = GZip()

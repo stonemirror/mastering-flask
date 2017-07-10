@@ -1,0 +1,6 @@
+setup.py
+Flask_YouTube.egg-info/PKG-INFO
+Flask_YouTube.egg-info/SOURCES.txt
+Flask_YouTube.egg-info/dependency_links.txt
+Flask_YouTube.egg-info/requires.txt
+Flask_YouTube.egg-info/top_level.txt
