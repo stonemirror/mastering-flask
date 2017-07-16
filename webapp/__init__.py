@@ -20,7 +20,7 @@ from webapp.extensions import (
     admin,
     mail,
     youtube_ext,
-    flask_gzip
+    # flask_gzip
 )
 from webapp.tasks import on_reminder_save
 from webapp.models import db, Reminder, User, Post, Role, Comment, Tag
@@ -116,7 +116,7 @@ def create_app(object_name):
     mail.init_app(app)
     youtube_ext.init_app(app)
 #
-# This extension and the debug toolbar can't both be running...
+# The gzip extension and the debug toolbar can't both be running...
 #
 #    flask_gzip.init_app(app)
 

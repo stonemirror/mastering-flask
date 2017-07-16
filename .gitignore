@@ -3,3 +3,7 @@ env/
 *.sublime-*
 *.sql
 celerybeat-schedule
+.webassets-cache/
+*.log
+common.css
+common.js

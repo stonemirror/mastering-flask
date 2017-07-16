@@ -1,4 +1,5 @@
 from celery.schedules import crontab
+import tempfile
 
 
 class Config(object):
@@ -27,6 +28,21 @@ class DevConfig(Config):
     }
     CACHE_TYPE = 'null'
     ASSETS_DEBUG = True
+    MAIL_SERVER = 'mail.mcfate.us'
+    MAIL_USERNAME = 'mcfate@mcfate.us'
+    MAIL_PASSWORD = '8zLlaD&2OLMy3%'
+
+
+class TestConfig(Config):
+    db_file = tempfile.NamedTemporaryFile()
+    DEBUG = True
+    DEBUG_TB_ENABLED = False
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + db_file.name
+    CACHE_TYPE = 'null'
+    WTF_CSRF_ENABLED = False
+    CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672//"
+    CELERY_BACKEND_URL = "amqp://guest:guest@localhost:5672//"
+    CELERY_RESULT_BACKEND = "amqp://"
     MAIL_SERVER = 'mail.mcfate.us'
     MAIL_USERNAME = 'mcfate@mcfate.us'
     MAIL_PASSWORD = '8zLlaD&2OLMy3%'
